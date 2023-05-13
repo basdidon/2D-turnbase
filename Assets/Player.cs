@@ -1,22 +1,10 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 public class Player : Character
 {
     [SerializeField] Inputs Inputs { get; set; }
     [SerializeField] float moveTime = 0.2f;
-
-    ICharacterState state;
-    public ICharacterState State {
-        get { return state; }
-        set { 
-            state?.EndState();
-            state = value;
-            state.StartState();
-        }
-    }
-    public ICharacterState IdleState = new PlayerIdleState();
 
     private void OnEnable()
     {
@@ -36,43 +24,28 @@ public class Player : Character
             {
                 Vector2 input = ctx.ReadValue<Vector2>();
                 Vector3Int des = GridPosition + (input.x < 0 ? Vector3Int.left : input.x > 0 ? Vector3Int.right : input.y < 0 ? Vector3Int.down : Vector3Int.up);
-                BroadManager.Instance.MoveObject(this, des);
-                State = new PlayerMoveState(this, transform.position, CellCenterWorld, moveTime);
+
+                if (BroadManager.MoveObject(this, des))
+                {
+                    State = new PlayerMoveState(this, transform.position, CellCenterWorld, moveTime);
+                }
+                else if (BroadManager.TryGetBroadObjectOnGridPosition(des, out BroadObject broadObject))
+                {
+                    if (broadObject is IDamageable damageable)
+                    {
+                        damageable.TakeDamage(1);
+                    }
+                }
             }
         };
     }
 
-    void Start()
+    private void Update()
     {
-        BroadManager.Instance.AddObject(this, transform.position);
-
-        State = IdleState;
+        State.UpdateState();    
     }
 
     #region State
-    class PlayerIdleState : ICharacterState
-    {
-        public PlayerIdleState()
-        {
-
-        }
-
-        public void StartState()
-        {
-
-        }
-
-        public void UpdateState()
-        {
-
-        }
-
-        public void EndState()
-        {
-
-        }
-    }
-
     class PlayerMoveState : ICharacterState
     {
         Player Player { get; }

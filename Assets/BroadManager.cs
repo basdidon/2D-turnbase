@@ -39,30 +39,53 @@ public class BroadManager : MonoBehaviour
     {
         Vector3Int gridPosition = groundTileMap.WorldToCell(worldPosition);
 
-        if (broadObjectGridPosition.ContainsKey(broadObject))
-            Debug.LogError("BroadObject is already in the list");
-
         if (!CanMove(gridPosition))
-            Debug.LogError("initPosition is already used");
+            Debug.LogError("initPosition is not avariable");
 
-        broadObjectGridPosition.Add(broadObject, gridPosition);
-        Debug.Log(broadObject.ToString()+" Start at : " + gridPosition);
-        // move player to cell potion
-        broadObject.SetObjectToWorldPosition(groundTileMap.GetCellCenterWorld(gridPosition));
+        if (broadObjectGridPosition.TryAdd(broadObject, gridPosition))
+        {
+            Debug.Log(broadObject.ToString() + " Start at : " + gridPosition);
+            // move player to cell potion
+            broadObject.transform.position = broadObject.CellCenterWorld;
+        }
+        else
+        {
+            Debug.LogError("BroadObject is already in the list");
+        }
     }
     public void RemoveObject(BroadObject broadObject)
     {
         broadObjectGridPosition.Remove(broadObject);
     }
 
-    public void MoveObject(BroadObject broadObject, Vector3Int destination)
+    public bool MoveObject(BroadObject broadObject, Vector3Int destination)
     {
         // update gridposition in dict
         // each charecter have a many way to move such as jump, run, blink
         // we will handle it later
         if (CanMove(destination))
+        {
             broadObjectGridPosition[broadObject] = destination;
+            return true;
+        }
 
+        return false;
+    }
+
+    public bool TryGetBroadObjectOnGridPosition(Vector3Int gridPosition, out BroadObject broadObject)
+    {
+        broadObject = null;
+
+        foreach (var pair in broadObjectGridPosition)
+        {
+            if(pair.Value == gridPosition)
+            {
+                broadObject = pair.Key;
+                return true;
+            }
+        }
+        
+        return false;
     }
     
 }
