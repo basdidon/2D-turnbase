@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Character : BroadObject
+public class Character : BoardObject
 {
     [SerializeField] int hp = 1;
     public int Hp {
@@ -13,7 +13,7 @@ public class Character : BroadObject
             hp = value;
             if (hp <= 0)
             {
-                BroadManager.RemoveObject(this);
+                BoardManager.RemoveObject(this);
                 Destroy(this.gameObject);
             }
         }
@@ -25,7 +25,7 @@ public class Character : BroadObject
 
     protected virtual void Start()
     {
-        BroadManager.AddObject(this, transform.position);
+        BoardManager.AddObject(this, transform.position);
 
         State = IdleState;
     }

@@ -5,6 +5,7 @@ public class Player : Character
 {
     [SerializeField] Inputs Inputs { get; set; }
     [SerializeField] float moveTime = 0.2f;
+    [SerializeField] LayerMask boardMask;
 
     private void OnEnable()
     {
@@ -25,11 +26,11 @@ public class Player : Character
                 Vector2 input = ctx.ReadValue<Vector2>();
                 Vector3Int des = GridPosition + (input.x < 0 ? Vector3Int.left : input.x > 0 ? Vector3Int.right : input.y < 0 ? Vector3Int.down : Vector3Int.up);
 
-                if (BroadManager.MoveObject(this, des))
+                if (BoardManager.MoveObject(this, des))
                 {
                     State = new PlayerMoveState(this, transform.position, CellCenterWorld, moveTime);
                 }
-                else if (BroadManager.TryGetBroadObjectOnGridPosition(des, out BroadObject broadObject))
+                else if (BoardManager.TryGetBoardObjectOnGridPosition(des, out BoardObject broadObject))
                 {
                     if (broadObject is IDamageable damageable)
                     {
@@ -42,7 +43,14 @@ public class Player : Character
 
     private void Update()
     {
-        State.UpdateState();    
+        State.UpdateState();
+
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int cO = BoardManager.GroundTileMap.WorldToCell(mouseWorldPos);
+
+        
+
+        Debug.Log("Cursor on " + (Vector2Int) cO);
     }
 
     #region State

@@ -1,20 +1,20 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class BroadManager : MonoBehaviour
+public class BoardManager : MonoBehaviour
 {
-    public static BroadManager Instance { get; private set; }
+    public static BoardManager Instance { get; private set; }
     [SerializeField] Tilemap groundTileMap;
+    public Tilemap GroundTileMap { get { return groundTileMap; } }
     [SerializeField] Tilemap colliderTileMap;
 
-    [SerializeField] Dictionary<BroadObject, Vector3Int> broadObjectGridPosition = new Dictionary<BroadObject, Vector3Int>();
-    public Vector3Int GetGridPosition (BroadObject broadObject)
+    [SerializeField] Dictionary<BoardObject, Vector3Int> broadObjectGridPosition = new Dictionary<BoardObject, Vector3Int>();
+    public Vector3Int GetGridPosition (BoardObject broadObject)
     {
         return broadObjectGridPosition[broadObject]; 
     }
-    public Vector3 GetCellCenterWolrd (BroadObject broadObject)
+    public Vector3 GetCellCenterWolrd (BoardObject broadObject)
     {
         return groundTileMap.GetCellCenterWorld(GetGridPosition(broadObject));
     }
@@ -35,7 +35,7 @@ public class BroadManager : MonoBehaviour
         return groundTileMap.HasTile(newCellPosition) && !colliderTileMap.HasTile(newCellPosition) && !broadObjectGridPosition.ContainsValue(newCellPosition);
     }
 
-    public void AddObject(BroadObject broadObject,Vector3 worldPosition)
+    public void AddObject(BoardObject broadObject,Vector3 worldPosition)
     {
         Vector3Int gridPosition = groundTileMap.WorldToCell(worldPosition);
 
@@ -50,15 +50,15 @@ public class BroadManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("BroadObject is already in the list");
+            Debug.LogError("BoardObject is already in the list");
         }
     }
-    public void RemoveObject(BroadObject broadObject)
+    public void RemoveObject(BoardObject broadObject)
     {
         broadObjectGridPosition.Remove(broadObject);
     }
 
-    public bool MoveObject(BroadObject broadObject, Vector3Int destination)
+    public bool MoveObject(BoardObject broadObject, Vector3Int destination)
     {
         // update gridposition in dict
         // each charecter have a many way to move such as jump, run, blink
@@ -72,7 +72,7 @@ public class BroadManager : MonoBehaviour
         return false;
     }
 
-    public bool TryGetBroadObjectOnGridPosition(Vector3Int gridPosition, out BroadObject broadObject)
+    public bool TryGetBoardObjectOnGridPosition(Vector3Int gridPosition, out BoardObject broadObject)
     {
         broadObject = null;
 

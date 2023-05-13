@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 461040085}
   - component: {fileID: 461040090}
   - component: {fileID: 461040089}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -762,7 +762,7 @@ GameObject:
   - component: {fileID: 1210160168}
   - component: {fileID: 1210160170}
   - component: {fileID: 1210160169}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3299,7 +3299,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1275994851}
   - component: {fileID: 1275994850}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Grid
   m_TagString: Untagged
   m_Icon: {fileID: 0}

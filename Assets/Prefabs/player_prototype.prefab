@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2011745513514008574}
   - component: {fileID: 2011745513514008575}
   - component: {fileID: 2011745513514008573}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: player_prototype
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,3 +99,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hp: 1
   moveTime: 0.2
+  boardMask:
+    serializedVersion: 2
+    m_Bits: 2147483647
