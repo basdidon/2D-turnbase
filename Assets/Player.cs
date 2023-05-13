@@ -2,11 +2,10 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Player : MonoBehaviour
+public class Player : Character
 {
     [SerializeField] Inputs Inputs { get; set; }
-    [SerializeField] Tilemap groundTileMap;
-    [SerializeField] Tilemap colliderTileMap;
+    [SerializeField] float moveTime = 0.2f;
 
     ICharacterState state;
     public ICharacterState State {
@@ -18,7 +17,6 @@ public class Player : MonoBehaviour
         }
     }
     public ICharacterState IdleState = new PlayerIdleState();
-    private Vector3Int CellPosition { get; set; }
 
     private void OnEnable()
     {
@@ -35,36 +33,20 @@ public class Player : MonoBehaviour
         Inputs.Player.Move.performed += ctx =>
         {
             if(State == IdleState)
-                Move(ctx.ReadValue<Vector2>());
+            {
+                Vector2 input = ctx.ReadValue<Vector2>();
+                Vector3Int des = GridPosition + (input.x < 0 ? Vector3Int.left : input.x > 0 ? Vector3Int.right : input.y < 0 ? Vector3Int.down : Vector3Int.up);
+                BroadManager.Instance.MoveObject(this, des);
+                State = new PlayerMoveState(this, transform.position, CellCenterWorld, moveTime);
+            }
         };
     }
 
     void Start()
     {
-        CellPosition = groundTileMap.WorldToCell(transform.position);
-        Debug.Log("Player Start at : " + CellPosition);
-        // move player to cell potion
-        transform.position = groundTileMap.GetCellCenterWorld(CellPosition);
+        BroadManager.Instance.AddObject(this, transform.position);
 
         State = IdleState;
-    }
-
-
-
-    private void Move(Vector2 direction)
-    {
-        Debug.Log("Move to " + direction);
-        Vector3Int newCellPosition = groundTileMap.WorldToCell(transform.position + (Vector3)direction);
-
-        if (CanMove(newCellPosition))
-        {
-            State = new PlayerMoveState(this,transform.position, groundTileMap.GetCellCenterWorld(newCellPosition),1f);
-        }
-    }
-
-    private bool CanMove(Vector3Int newCellPosition)
-    {
-        return groundTileMap.HasTile(newCellPosition) && !colliderTileMap.HasTile(newCellPosition);
     }
 
     #region State
@@ -117,7 +99,7 @@ public class Player : MonoBehaviour
             }
 
             Player.transform.position = To;
-            Debug.Log("you are at : " + To);
+            Debug.Log("you are at : " + (Vector2Int)Player.GridPosition);
             Player.State = Player.IdleState;
         }
 
