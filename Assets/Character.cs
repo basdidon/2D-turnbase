@@ -13,7 +13,7 @@ public class Character : BoardObject
             hp = value;
             if (hp <= 0)
             {
-                BoardManager.RemoveObject(this);
+                
                 Destroy(this.gameObject);
             }
         }
@@ -23,6 +23,10 @@ public class Character : BoardObject
         Hp -= damage;
     }
 
+    [SerializeField] int actionPoint = 1;
+    [SerializeField] int remainActionPoint;
+    [SerializeField] protected float moveTime = 0.2f;
+
     protected virtual void Start()
     {
         BoardManager.AddObject(this, transform.position);
@@ -30,6 +34,32 @@ public class Character : BoardObject
         State = IdleState;
     }
 
+    protected virtual void OnDestroy()
+    {
+        BoardManager.RemoveObject(this);
+    }
+
+    #region Turn
+    public virtual void OnStartTurn()
+    {
+        remainActionPoint = actionPoint;
+    }
+
+    public virtual void ConsumeActionPoint()
+    {
+        remainActionPoint--;
+        if(remainActionPoint <= 0)
+        {
+            OnEndTurn();
+        }
+    }
+
+    public virtual void OnEndTurn()
+    {
+        TurnManager.Instance.NextTurn();
+        Debug.Log(this.gameObject.name + " EndTurn()");
+    }
+    #endregion
     #region State
     ICharacterState state;
     public ICharacterState State

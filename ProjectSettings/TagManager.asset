@@ -44,6 +44,9 @@ TagManager:
   - name: Base
     uniqueID: 3506590209
     locked: 0
+  - name: Overlay
+    uniqueID: 4251399147
+    locked: 0
   - name: Object
     uniqueID: 1654613767
     locked: 0

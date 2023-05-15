@@ -3,17 +3,30 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class BoardManager : MonoBehaviour
-{
+{ 
     public static BoardManager Instance { get; private set; }
     [SerializeField] Tilemap groundTileMap;
-    public Tilemap GroundTileMap { get { return groundTileMap; } }
     [SerializeField] Tilemap colliderTileMap;
+    [SerializeField] Tilemap overlayTilemap;
 
+    [SerializeField] TileBase tileBase;
+      
     [SerializeField] Dictionary<BoardObject, Vector3Int> broadObjectGridPosition = new Dictionary<BoardObject, Vector3Int>();
+    [SerializeField] Vector3Int focusCell;
+    public Vector3Int FocusCell { 
+        get { return focusCell; } 
+        set { 
+            overlayTilemap.ClearAllTiles();
+            focusCell = value;
+            overlayTilemap.SetTile(focusCell, tileBase);
+        } 
+    }
+
     public Vector3Int GetGridPosition (BoardObject broadObject)
     {
         return broadObjectGridPosition[broadObject]; 
     }
+
     public Vector3 GetCellCenterWolrd (BoardObject broadObject)
     {
         return groundTileMap.GetCellCenterWorld(GetGridPosition(broadObject));
@@ -52,7 +65,7 @@ public class BoardManager : MonoBehaviour
         {
             Debug.LogError("BoardObject is already in the list");
         }
-    }
+    } 
     public void RemoveObject(BoardObject broadObject)
     {
         broadObjectGridPosition.Remove(broadObject);
@@ -87,5 +100,11 @@ public class BoardManager : MonoBehaviour
         
         return false;
     }
-    
+
+    private void Update()
+    {
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        
+        FocusCell = groundTileMap.WorldToCell(mouseWorldPos);
+    }
 }

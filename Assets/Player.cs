@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class Player : Character
 {
+    public static Player Instance { get; private set; }
+    TurnManager TurnManager { get { return TurnManager.Instance; } }
     [SerializeField] Inputs Inputs { get; set; }
-    [SerializeField] float moveTime = 0.2f;
-    [SerializeField] LayerMask boardMask;
 
     private void OnEnable()
     {
@@ -18,17 +18,26 @@ public class Player : Character
 
     private void Awake()
     {
+        if(Instance != null && Instance != this)
+        {
+            Destroy(this);
+        }
+        else
+        {
+            Instance = this;
+        }
+
         Inputs = new Inputs();
         Inputs.Player.Move.performed += ctx =>
         {
-            if(State == IdleState)
+            if(TurnManager.CurrentTurn == Turn.PlayerTurn && State == IdleState)
             {
                 Vector2 input = ctx.ReadValue<Vector2>();
                 Vector3Int des = GridPosition + (input.x < 0 ? Vector3Int.left : input.x > 0 ? Vector3Int.right : input.y < 0 ? Vector3Int.down : Vector3Int.up);
 
                 if (BoardManager.MoveObject(this, des))
                 {
-                    State = new PlayerMoveState(this, transform.position, CellCenterWorld, moveTime);
+                    State = new MoveState(this, moveTime);
                 }
                 else if (BoardManager.TryGetBoardObjectOnGridPosition(des, out BoardObject broadObject))
                 {
@@ -37,6 +46,8 @@ public class Player : Character
                         damageable.TakeDamage(1);
                     }
                 }
+
+                ConsumeActionPoint();   
             }
         };
     }
@@ -44,61 +55,5 @@ public class Player : Character
     private void Update()
     {
         State.UpdateState();
-
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3Int cO = BoardManager.GroundTileMap.WorldToCell(mouseWorldPos);
-
-        
-
-        Debug.Log("Cursor on " + (Vector2Int) cO);
     }
-
-    #region State
-    class PlayerMoveState : ICharacterState
-    {
-        Player Player { get; }
-        Vector3 From { get; }
-        Vector3 To { get; }
-        float LerpDuration { get; }
-
-        public PlayerMoveState(Player player,Vector3 from,Vector3 to,float lerpDuration)
-        {
-            Player = player;
-            From = from;
-            To = to;
-            LerpDuration = lerpDuration;
-        }
-
-        IEnumerator MoveIE()
-        {
-            float timeElapsed = 0;
-            while (timeElapsed < LerpDuration)
-            {
-                Player.transform.position = Vector3.Lerp(From, To, timeElapsed / LerpDuration);
-                timeElapsed += Time.deltaTime;
-                yield return null;
-            }
-
-            Player.transform.position = To;
-            Debug.Log("you are at : " + (Vector2Int)Player.GridPosition);
-            Player.State = Player.IdleState;
-        }
-
-
-        public void StartState()
-        {
-            Player.StartCoroutine(MoveIE());
-        }
-
-        public void UpdateState()
-        {
-
-        }
-
-        public void EndState()
-        {
-
-        }
-    }
-    #endregion
 }
