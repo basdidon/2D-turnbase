@@ -16,4 +16,9 @@ public class Enemy : Character, IDamageable
         base.OnDestroy();
         TurnManager.Instance.Enemies.Remove(this);
     }
+
+    public Vector3Int[] Predict()
+    {
+        
+    }
 }

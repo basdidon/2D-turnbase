@@ -13,7 +13,7 @@ public class BoardManager : MonoBehaviour
       
     [SerializeField] Dictionary<BoardObject, Vector3Int> broadObjectGridPosition = new Dictionary<BoardObject, Vector3Int>();
     [SerializeField] Vector3Int focusCell;
-    public Vector3Int FocusCell { 
+    public Vector3Int FocusCell {
         get { return focusCell; } 
         set { 
             overlayTilemap.ClearAllTiles();
@@ -31,6 +31,7 @@ public class BoardManager : MonoBehaviour
     {
         return groundTileMap.GetCellCenterWorld(GetGridPosition(broadObject));
     }
+
     private void Awake()
     {
         if (Instance != null && Instance != this) 
@@ -43,16 +44,16 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public bool CanMove(Vector3Int newCellPosition)
+    public bool IsFreeTile(Vector3Int cellPosition)
     {
-        return groundTileMap.HasTile(newCellPosition) && !colliderTileMap.HasTile(newCellPosition) && !broadObjectGridPosition.ContainsValue(newCellPosition);
+        return groundTileMap.HasTile(cellPosition) && !colliderTileMap.HasTile(cellPosition) && !broadObjectGridPosition.ContainsValue(cellPosition);
     }
 
     public void AddObject(BoardObject broadObject,Vector3 worldPosition)
     {
         Vector3Int gridPosition = groundTileMap.WorldToCell(worldPosition);
 
-        if (!CanMove(gridPosition))
+        if (!IsFreeTile(gridPosition))
             Debug.LogError("initPosition is not avariable");
 
         if (broadObjectGridPosition.TryAdd(broadObject, gridPosition))
@@ -65,20 +66,26 @@ public class BoardManager : MonoBehaviour
         {
             Debug.LogError("BoardObject is already in the list");
         }
-    } 
+    }
+
     public void RemoveObject(BoardObject broadObject)
     {
         broadObjectGridPosition.Remove(broadObject);
     }
 
-    public bool MoveObject(BoardObject broadObject, Vector3Int destination)
+    public bool TryDirectionalMove(BoardObject boardObject,Vector3Int direction)
+    {
+        return TryMoveObject(boardObject, boardObject.GridPosition + direction);
+    }
+
+    public bool TryMoveObject(BoardObject boardObject, Vector3Int destination)
     {
         // update gridposition in dict
         // each charecter have a many way to move such as jump, run, blink
         // we will handle it later
-        if (CanMove(destination))
+        if (IsFreeTile(destination))
         {
-            broadObjectGridPosition[broadObject] = destination;
+            broadObjectGridPosition[boardObject] = destination;
             return true;
         }
 
@@ -97,7 +104,6 @@ public class BoardManager : MonoBehaviour
                 return true;
             }
         }
-        
         return false;
     }
 
@@ -106,5 +112,17 @@ public class BoardManager : MonoBehaviour
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         
         FocusCell = groundTileMap.WorldToCell(mouseWorldPos);
+    }
+
+    public List<Vector3Int> GetMoveableDirection(Vector3Int cell)
+    {
+        List<Vector3Int> moveableDirection = new List<Vector3Int>();
+        List<Vector3Int> directions = new List<Vector3Int>() { Vector3Int.up, Vector3Int.down, Vector3Int.left, Vector3Int.right };
+
+        foreach (var direction in directions)
+            if (IsFreeTile(cell + direction))
+                moveableDirection.Add(direction);
+
+        return moveableDirection;
     }
 }
