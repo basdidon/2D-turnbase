@@ -24,7 +24,7 @@ public class NodeBase
         H = Mathf.Abs(CellPosition.x - targetCell.x) + Mathf.Abs(CellPosition.y - targetCell.y);
         directionMoveToNode = direcions;
     }
-
+    /*
     public static void FindDirectionMovePath(Vector3Int startCell, Vector3Int targetCell)
     {
         NodeBase startNode = new NodeBase(startCell,0,targetCell);
@@ -50,4 +50,5 @@ public class NodeBase
             }
         }
     }
+    */
 }

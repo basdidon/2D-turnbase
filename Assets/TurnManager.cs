@@ -1,20 +1,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 
 public enum Turn { PlayerTurn, EnemyTurn }
 
-public class TurnManager : MonoBehaviour
+public class TurnManager : SerializedMonoBehaviour
 {
     public static TurnManager Instance { get; private set; }
 
-    [SerializeField] Turn currentTrun;
-    public Turn CurrentTurn { get { return currentTrun; } set { currentTrun = value; } }
-
-    [SerializeField] List<Enemy> enemies;
-    public List<Enemy> Enemies { get { return enemies; } }
-    [SerializeField] Queue<Enemy> enemiesQueue;
-    public Queue<Enemy> EnemiesQueue { get { return enemiesQueue; } private set { enemiesQueue = value; } }
+    [OdinSerialize] public Character CharacterTurn { get; private set; }
+    [OdinSerialize] public Queue<Character> CharactersQueue { get; private set; }
 
     private void Awake()
     {
@@ -26,52 +23,33 @@ public class TurnManager : MonoBehaviour
         {
             Instance = this;
         }
-
-        EnemiesQueue = new Queue<Enemy>();
     }
 
     private void Start()
     {
-        Enemies.AddRange(FindObjectsOfType<Enemy>());
-        CurrentTurn = Turn.PlayerTurn;
+        var enemies = FindObjectsOfType<Enemy>();
+
+        CharacterTurn = Player.Instance;
         Player.Instance.OnStartTurn();
+       
+        foreach (var e in enemies)
+        {
+            CharactersQueue.Enqueue(e);
+        }
     }
 
     public void NextTurn()
     {
-        Character nextCharacter;
-        if(CurrentTurn == Turn.PlayerTurn)
-        {
-            CurrentTurn = Turn.EnemyTurn;
-            
-            foreach(var e in Enemies)
-            {
-                EnemiesQueue.Enqueue(e);
-            }
-
-            nextCharacter = EnemiesQueue.Dequeue();
-        }
-        else // if(CurrentTurn == Turn.EnemyTurn)
-        {
-            if (EnemiesQueue.TryDequeue(out Enemy enemy))
-            {
-                nextCharacter = enemy;
-            }
-            else
-            {
-                CurrentTurn = Turn.PlayerTurn;
-                nextCharacter = Player.Instance;
-            }  
-        }
-
-
+        Character nextCharacter = CharactersQueue.Dequeue();
         if(nextCharacter == null)
         {
             NextTurn();
         }
         else
         {
-            nextCharacter.OnStartTurn();
+            CharactersQueue.Enqueue(CharacterTurn);
+            CharacterTurn = nextCharacter;
+            CharacterTurn.OnStartTurn();
         }
     }
 }

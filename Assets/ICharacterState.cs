@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Sirenix.OdinInspector;
 
 public interface ICharacterState
 {
@@ -33,7 +34,7 @@ class MoveState : ICharacterState
         }
 
         Character.transform.position = des;
-        Debug.Log("you are at : " + (Vector2Int) Character.GridPosition);
+        Debug.Log(Character.name+ " are at : " + (Vector2Int) Character.GridPosition);
         Character.State = Character.IdleState;
     }
 

@@ -1,4 +1,6 @@
 using UnityEngine;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 
 public class Character : BoardObject
 {
@@ -54,6 +56,7 @@ public class Character : BoardObject
         }
     }
 
+    [Button]
     public virtual void OnEndTurn()
     {
         TurnManager.Instance.NextTurn();
@@ -61,7 +64,7 @@ public class Character : BoardObject
     }
     #endregion
     #region State
-    ICharacterState state;
+    [OdinSerialize] ICharacterState state;
     public ICharacterState State
     {
         get { return state; }
